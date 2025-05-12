@@ -9,7 +9,7 @@
     },
     "maxKESEvolutions": 62,
     "maxLovelaceSupply": 45000000000000000,
-    "networkId": "mainnet",
+    "networkId": "Mainnet",
     "networkMagic": 764824073,
     "protocolParams": {
         "a0": 0.3,
@@ -50,7 +50,7 @@
                     "credential": {
                         "key hash": "340b76493856d084a922cdff301a9c09c52a3fdb3f4bea755c7fd745"
                     },
-                    "network": "mainnet"
+                    "network": "Mainnet"
                 },
                 "vrf": "8975a2f38cd6373e12f2ebe43fbe1e741e78eb3dfd80ee24dd01c8811977c0d9"
             }
