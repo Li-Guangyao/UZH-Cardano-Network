@@ -5,11 +5,11 @@
     "securityParam": 10,
     "genDelegs": {},
     "initialFunds": {
-        "017955569e4357036be89038774d2e99b003d49afb906d9eae066cb858a97553b3fe384a964a8935a759396116b502499d7fd5a3eb5beff9b9": 15000000000000000
+        "007955569e4357036be89038774d2e99b003d49afb906d9eae066cb858a97553b3fe384a964a8935a759396116b502499d7fd5a3eb5beff9b9": 15000000000000000
     },
     "maxKESEvolutions": 62,
     "maxLovelaceSupply": 45000000000000000,
-    "networkId": "Mainnet",
+    "networkId": "Testnet",
     "networkMagic": 764824073,
     "protocolParams": {
         "a0": 0.3,
@@ -50,7 +50,7 @@
                     "credential": {
                         "key hash": "340b76493856d084a922cdff301a9c09c52a3fdb3f4bea755c7fd745"
                     },
-                    "network": "Mainnet"
+                    "network": "Testnet"
                 },
                 "vrf": "8975a2f38cd6373e12f2ebe43fbe1e741e78eb3dfd80ee24dd01c8811977c0d9"
             }
@@ -59,6 +59,6 @@
             "dd024cdd3dd83d57cf4d80fb80cdea51cc6d976ed95df95884645aa1": "340b76493856d084a922cdff301a9c09c52a3fdb3f4bea755c7fd745"
         }
     },
-    "systemStart": "2025-05-12T19:40:00Z",
+    "systemStart": "2025-05-12T20:00:00Z",
     "updateQuorum": 1
 }

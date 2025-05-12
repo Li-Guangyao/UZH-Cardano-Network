@@ -1,9 +1,9 @@
 {
     "protocolConsts": {
         "k": 10,
-        "protocolMagic": 764824073
+        "protocolMagic": 2025
     },
-    "startTime": 1747071600,
+    "startTime": 1747072800,
     "blockVersionData": {
         "scriptVersion": 0,
         "slotDuration": "250",

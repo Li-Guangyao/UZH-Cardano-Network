@@ -6,8 +6,8 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-# NETWORK_MAGIC="--testnet-magic 2023"
-NETWORK_MAGIC="--mainnet"
+NETWORK_MAGIC="--testnet-magic 2025"
+# NETWORK_MAGIC="--mainnet"
 
 set -euo pipefail
 
