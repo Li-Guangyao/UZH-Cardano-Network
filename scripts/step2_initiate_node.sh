@@ -8,7 +8,6 @@ fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-NETWORK_MAGIC=2025
 TMP_PATH=~/tmp
 
 
