@@ -6,8 +6,8 @@ if [ "$#" -ne 1 ]; then
     return 1
 fi
 
-# NETWORK_MAGIC="--testnet-magic 2023"
-NETWORK_MAGIC="--mainnet"
+NETWORK_MAGIC="--testnet-magic 2025"
+# NETWORK_MAGIC="--mainnet"
 
 POOL_NAME=$1
 echo POOL_NAME: $POOL_NAME
