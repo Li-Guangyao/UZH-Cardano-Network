@@ -66,7 +66,7 @@ cardano-cli node key-gen-VRF \
         --verification-key-file $POOL_KEYS_PATH/vrf.vkey \
         --signing-key-file $POOL_KEYS_PATH/vrf.skey
 
-chmod 400 $POOL_KEYS_PATH/vrf.skey
+# chmod 400 $POOL_KEYS_PATH/vrf.skey
 
 mkdir -p $CNODE_HOME/priv/pool/$POOL_NAME
 
