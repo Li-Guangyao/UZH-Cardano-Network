@@ -3,7 +3,7 @@
         "k": 10,
         "protocolMagic": 2025
     },
-    "startTime": 1747081800,
+    "startTime": 1747652700,
     "blockVersionData": {
         "scriptVersion": 0,
         "slotDuration": "250",
@@ -28,7 +28,7 @@
         "unlockStakeEpoch": "18446744073709551615"
     },
     "bootStakeholders": {
-        "dd024cdd3dd83d57cf4d80fb80cdea51cc6d976ed95df95884645aa1": 1
+        "a97553b3fe384a964a8935a759396116b502499d7fd5a3eb5beff9b9": 1
     },
     "heavyDelegation": {},
     "nonAvvmBalances": {},
