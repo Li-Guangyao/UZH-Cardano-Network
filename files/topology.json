@@ -1,0 +1,50 @@
+{
+    "localRoots": [
+        {
+            "accessPoints": [
+                {
+                    "address": "172.23.75.230",
+                    "port": 6000
+                },
+                {
+                    "address": "172.23.75.231",
+                    "port": 6000
+                },
+                {
+                    "address": "172.23.75.233",
+                    "port": 6000
+                },
+                {
+                    "address": "130.60.24.200",
+                    "port": 6000
+                }
+            ],
+            "advertise": true,
+            "valency": 1
+        }
+    ],
+    "useLedgerAfterSlot": 0,
+    "publicRoots": [
+        {
+            "accessPoints": [
+                {
+                    "address": "172.23.75.230",
+                    "port": 6000
+                },
+                {
+                    "address": "172.23.75.231",
+                    "port": 6000
+                },
+                {
+                    "address": "172.23.75.233",
+                    "port": 6000
+                },
+                {
+                    "address": "130.60.24.200",
+                    "port": 6000
+                }
+            ],
+            "advertise": true
+        }
+    ]
+}
