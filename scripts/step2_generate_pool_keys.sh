@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
-# Check if the user provided an input
-if [ "$#" -ne 1 ]; then
-    echo "Usage: ./step3_generate_pool_keys.sh <pool_name>"
-    return 1
-fi
+# # Check if the user provided an input
+# if [ "$#" -ne 1 ]; then
+#     echo "Usage: ./step3_generate_pool_keys.sh <pool_name>"
+#     return 1
+# fi
 
 TESTNET_MAGIC="--testnet-magic 2025"
 SOCKET_PATH="--socket-path ${CNODE_HOME}/sockets/node.socket"
 
-POOL_NAME=$1
-echo POOL_NAME: $POOL_NAME
+# POOL_NAME=$1
+POOL_NAME="pool2"
+# echo POOL_NAME: $POOL_NAME
 
 UTXO_KEYS_PATH=~/keys/utxo-keys
 POOL_KEYS_PATH=~/keys/pool-keys

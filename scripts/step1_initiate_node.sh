@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # Check if the user provided an input
-if [ "$#" -ne 1 ]; then
-    echo "Usage: ./step2_initiate_node.sh <pool_name>"
-    return 1
-fi
+# if [ "$#" -ne 1 ]; then
+#     echo "Usage: ./step1_initiate_node.sh <pool_name>"
+#     return 1
+# fi
 
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -66,9 +66,8 @@ fi
 
 # Use awk to find and insert the line to the env file:
 PATTERN="POOL_NAME"
-NEW_LINE="POOL_NAME=\"$1\""
+NEW_LINE="POOL_NAME=\"pool2\""
 awk -v pattern="$PATTERN" -v newline="$NEW_LINE" '
 $0 ~ pattern && !modif { print $0; print newline; modif=1; next }
 { print }
 ' "$CNODE_ENV_FILE" > "${CNODE_ENV_FILE}.tmp" && mv "${CNODE_ENV_FILE}.tmp" "$CNODE_ENV_FILE"
-
