@@ -103,9 +103,7 @@ echo "-----------------------------------"
 # Send the transaction:
 #    --> Output should be as follows: "Transaction successfully submitted."
 cardano-cli babbage transaction submit \
-    --tx-file $TXS_PATH/tx4.signed \ 
-    $TESTNET_MAGIC \
-    $SOCKET_PATH \
+    --tx-file $TXS_PATH/tx4.signed $TESTNET_MAGIC $SOCKET_PATH \
     2>&1 | grep -v "WARNING:"
 
 

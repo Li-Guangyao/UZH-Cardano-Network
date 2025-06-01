@@ -8,19 +8,20 @@ UTXO_KEYS_PATH=~/keys/utxo-keys
 POOL_KEYS_PATH=~/keys/pool-keys
 TXS_PATH=~/txs
 
-stakePoolRewards="$(cardano-cli conway query stake-address-info $TESTNET_MAGIC --address $(< $UTXO_KEYS_PATH/stake.addr) | jq .[].rewardAccountBalance)"
+stakePoolRewards="$(cardano-cli query stake-address-info $TESTNET_MAGIC $SOCKET_PATH  --address $(< $UTXO_KEYS_PATH/stake.addr) | jq .[].rewardAccountBalance)"
 echo stakePoolRewards: $stakePoolRewards
 
 
 # Find the tip of the blockchain to set the invalid-hereafter parameter properly:
-currentSlot=$(cardano-cli query tip $TESTNET_MAGIC  | jq -r '.slot')
+currentSlot=$(cardano-cli query tip $TESTNET_MAGIC $SOCKET_PATH  | jq -r '.slot')
 echo Current Slot: $currentSlot
 
 
 # Find your balance and UTXOs:
-cardano-cli query utxo --address $(cat $UTXO_KEYS_PATH/payment.addr) $TESTNET_MAGIC  > $TXS_PATH/fullUtxo3.out
+cardano-cli query utxo --address $(cat $UTXO_KEYS_PATH/payment.addr) $TESTNET_MAGIC $SOCKET_PATH > $TXS_PATH/fullUtxo3.out
 tail -n +3 $TXS_PATH/fullUtxo3.out | sort -k3 -nr > $TXS_PATH/balance3.out
 cat $TXS_PATH/balance3.out
+
 tx_in=""
 total_balance=0
 while read -r utxo; do 

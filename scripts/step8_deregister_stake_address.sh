@@ -10,12 +10,12 @@ TXS_PATH=~/txs
 
 
 # Blochchain must be synced !
-# SYNC=$(cardano-cli query tip $TESTNET_MAGIC | jq '.syncProgress')
+SYNC=$(cardano-cli query tip $TESTNET_MAGIC | jq '.syncProgress')
 
-# if [ $SYNC != "\"100.00\"" ]; then
-#     echo -e "\nsyncProgress: $SYNC ... please wait for the node to sync and then try again.\n"
-#     return 1
-# fi
+if [ $SYNC != "\"100.00\"" ]; then
+    echo -e "\nsyncProgress: $SYNC ... please wait for the node to sync and then try again.\n"
+    return 1
+fi
 
 
 cardano-cli babbage stake-address deregistration-certificate \
@@ -51,8 +51,8 @@ done < $TXS_PATH/balance5.out
 # echo Total available ADA balance: ${total_balance}
 # echo Number of UTXOs: ${txcnt}
 
-# stakePoolRewards=$(cardano-cli query stake-address-info $TESTNET_MAGIC --address $(cat $UTXO_KEYS_PATH/stake.addr) | jq -r '.[0].rewardAccountBalance')
-# echo stakePoolRewards: $stakePoolRewards
+stakePoolRewards=$(cardano-cli query stake-address-info $TESTNET_MAGIC $SOCKET_PATH --address $(cat $UTXO_KEYS_PATH/stake.addr) | jq -r '.[0].rewardAccountBalance')
+echo stakePoolRewards: $stakePoolRewards
 
 # currentSlot=$(cardano-cli query tip $TESTNET_MAGIC | jq -r '.slot')
 # echo Current Slot: $currentSlot
@@ -66,6 +66,7 @@ cardano-cli babbage transaction build \
     ${tx_in} \
     --change-address $(cat $UTXO_KEYS_PATH/payment.addr) \
     $TESTNET_MAGIC \
+    $SOCKET_PATH \
     --withdrawal $(cat $UTXO_KEYS_PATH/stake.addr)+${stakePoolRewards} \
     --certificate-file $TXS_PATH/stake.dereg \
     --witness-override 2 \

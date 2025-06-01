@@ -50,7 +50,7 @@ UTXO_KEYS_PATH=~/keys/utxo-keys
 POOL_KEYS_PATH=~/keys/pool-keys
 TXS_PATH=~/txs
 
-rm ~/UZH-Cardano-Network/poolMetaDataHash.txt
+# rm ~/UZH-Cardano-Network/poolMetaDataHash.txt
 
 # Find the minimum pool cost --> (minPoolCost: 340000000):
 minPoolCost=$(cat $CNODE_HOME/files/params.json | jq -r .minPoolCost)
@@ -58,7 +58,7 @@ echo minPoolCost: ${minPoolCost}
 
 
 # Generate the Pool Metadata hash:
-cardano-cli babbage stake-pool metadata-hash --pool-metadata-file ~/UZH-Cardano-Network/md.json > ~/UZH-Cardano-Network/poolMetaDataHash.txt 2>&1 | grep -v "WARNING:"
+cardano-cli babbage stake-pool metadata-hash --pool-metadata-file ~/UZH-Cardano-Network/md.json > ~/UZH-Cardano-Network/poolMetaDataHash.txt
 poolMetaHash=$(cat poolMetaDataHash.txt)
 echo poolMetaHash: ${poolMetaHash}
 
