@@ -6,21 +6,21 @@ echo "--------------------------------------------------------"
 
 # Get Pool pledge
 while true; do
-  read -p "Please input pool pledge (must be a integer >= 0), e.g., 100000000000: " POOL_PLEDGE
+  read -p "Please input pool pledge (The unit is lovelace. This number must be a integer >= 0), e.g., 100000000000: " POOL_PLEDGE
   if [[ "$POOL_PLEDGE" =~ ^[0-9]+$ ]] && [ "$POOL_PLEDGE" -ge 0 ]; then
     break
 else
-    echo "❌ Invalid input: pool pledge must be an integer greater than or equal to 0, please re-enter."
+    echo "Invalid input: pool pledge must be an integer greater than or equal to 0, please re-enter."
   fi
 done
 
 # Get pool-cost
 while true; do
-    read -p "Please input pool cost (must be an integer >= 340000000), e.g., 345000000: " POOL_COST
+    read -p "Please input pool cost (The unit is lovelace. The number must be an integer >= 340,000,000), e.g., 345000000: " POOL_COST
     if [[ "$POOL_COST" =~ ^[0-9]+$ ]] && [ "$POOL_COST" -ge 340000000 ]; then
         break
     else
-        echo "❌ Invalid input: pool cost must be an integer greater than or equal to 340000000, please re-enter."
+        echo "Invalid input: pool cost must be an integer greater than or equal to 340,000,000, please re-enter."
     fi
 done
 
@@ -32,7 +32,7 @@ while true; do
          (( $(echo "$POOL_MARGIN < 1" | bc -l) )); then
         break
     else
-        echo "❌ Invalid input: pool margin must be a number greater than or equal to 0 and less than 1, please re-enter."
+        echo "Invalid input: pool margin must be a number greater than or equal to 0 and less than 1, please re-enter."
     fi
 done
 
