@@ -59,8 +59,6 @@ echo minPoolCost: ${minPoolCost}
 
 # Generate the Pool Metadata hash:
 cardano-cli babbage stake-pool metadata-hash --pool-metadata-file ~/UZH-Cardano-Network/md.json > ~/UZH-Cardano-Network/poolMetaDataHash.txt
-poolMetaHash=$(cat poolMetaDataHash.txt)
-echo poolMetaHash: ${poolMetaHash}
 
 
 # Create a "registration certificate" for the stake pool:
