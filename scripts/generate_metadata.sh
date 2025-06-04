@@ -29,11 +29,11 @@ while true; do
 done
 
 while true; do
-    read -p "Enter ticker (3-9 UPPERCASE letters or digits), e.g., TOMPOOL: " TICKER
-    if [[ $TICKER =~ ^[A-Z0-9]{3,9}$ ]]; then
+    read -p "Enter ticker (3-5 UPPERCASE letters or digits), e.g., TPOOL: " TICKER
+    if [[ $TICKER =~ ^[A-Z0-9]{3,5}$ ]]; then
         break
     else
-        echo "Invalid ticker format. Please use 3-9 uppercase letters or digits."
+        echo "Invalid ticker format. Please use 3-5 uppercase letters or digits."
     fi
 done
 
@@ -63,6 +63,13 @@ cat > "$METADATA_FILE" <<EOF
 }
 EOF
 echo "Metadata JSON created at $METADATA_FILE"
+
+# === Check metadata file size ===
+FILE_SIZE=$(stat -c%s "$METADATA_FILE")
+if [[ $FILE_SIZE -gt 512 ]]; then
+    echo "Metadata file is too large ($FILE_SIZE bytes). It must not exceed 512 bytes."
+    exit 1
+fi
 
 # === Upload JSON ===
 echo "Uploading metadata file..."
