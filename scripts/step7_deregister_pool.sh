@@ -89,7 +89,6 @@ cardano-cli babbage transaction sign \
     --signing-key-file $UTXO_KEYS_PATH/payment.skey \
     --signing-key-file $POOL_KEYS_PATH/node.skey \
     $TESTNET_MAGIC  \
-    $SOCKET_PATH \
     --out-file $TXS_PATH/tx4.signed \
     2>&1 | grep -v "WARNING:"
 
