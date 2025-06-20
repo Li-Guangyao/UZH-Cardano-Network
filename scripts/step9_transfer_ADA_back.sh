@@ -8,7 +8,7 @@ UTXO_KEYS_PATH=~/keys/utxo-keys
 POOL_KEYS_PATH=~/keys/pool-keys
 TXS_PATH=~/txs
 
-RECEIVER_ADDR="addr_test1qzuazz4cqx73wx0khan9c3pm47kvmv4t5wfw8h2qjplymdd3x5pce8zwt34gxxlcxjlzc7dxmkwhz4x26aqzjajyjhcsgu93sq"
+RECEIVER_ADDR="addr_test1qzt7r3cy7rl9509dv75f9qt8myfmz76r6j8vr5sq70y2rqulc9pqcn8hczr6sjs3s5nfd4uteufxyyq2ezxysada6c2qg2ee68"
 
 # Find your balance and UTXOs:
 cardano-cli query utxo --address $(cat $UTXO_KEYS_PATH/payment.addr) $TESTNET_MAGIC $SOCKET_PATH > $TXS_PATH/fullUtxo_faucet.out
