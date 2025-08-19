@@ -26,12 +26,19 @@ cardano-cli node key-gen-KES \
     --verification-key-file $POOL_KEYS_PATH/kes.vkey \
     --signing-key-file $POOL_KEYS_PATH/kes.skey
 
+chmod 444 $POOL_KEYS_PATH/kes.vkey
+chmod 444 $POOL_KEYS_PATH/kes.skey
+
 # Make cold key:
 #    --> Cold keys must be generated and stored on your air-gapped offline machine. The cold keys are the files stored in $HOME/pool-keys.
 cardano-cli node key-gen \
     --cold-verification-key-file $POOL_KEYS_PATH/node.vkey \
     --cold-signing-key-file $POOL_KEYS_PATH/node.skey \
     --operational-certificate-issue-counter $POOL_KEYS_PATH/node.counter
+
+chmod 444 $POOL_KEYS_PATH/node.vkey
+chmod 444 $POOL_KEYS_PATH/node.skey
+chmod 444 $POOL_KEYS_PATH/node.counter
 
 
 # Determine the number of slots per KES period from the genesis file:
@@ -56,12 +63,14 @@ cardano-cli node issue-op-cert \
         --kes-period $startKesPeriod \
         --out-file $POOL_KEYS_PATH/node.cert
 
+chmod 444 $POOL_KEYS_PATH/node.cert
 
 # Make a VRF key pair:
 cardano-cli node key-gen-VRF \
         --verification-key-file $POOL_KEYS_PATH/vrf.vkey \
         --signing-key-file $POOL_KEYS_PATH/vrf.skey
 
+chmod 400 $POOL_KEYS_PATH/vrf.vkey
 chmod 400 $POOL_KEYS_PATH/vrf.skey
 
 mkdir -p $CNODE_HOME/priv/pool/$POOL_NAME
