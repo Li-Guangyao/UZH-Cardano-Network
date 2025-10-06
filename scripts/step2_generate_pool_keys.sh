@@ -26,9 +26,6 @@ cardano-cli node key-gen-KES \
     --verification-key-file $POOL_KEYS_PATH/kes.vkey \
     --signing-key-file $POOL_KEYS_PATH/kes.skey
 
-chmod 444 $POOL_KEYS_PATH/kes.vkey
-chmod 444 $POOL_KEYS_PATH/kes.skey
-
 # Make cold key:
 #    --> Cold keys must be generated and stored on your air-gapped offline machine. The cold keys are the files stored in $HOME/pool-keys.
 cardano-cli node key-gen \
@@ -36,23 +33,17 @@ cardano-cli node key-gen \
     --cold-signing-key-file $POOL_KEYS_PATH/node.skey \
     --operational-certificate-issue-counter $POOL_KEYS_PATH/node.counter
 
-chmod 444 $POOL_KEYS_PATH/node.vkey
-chmod 444 $POOL_KEYS_PATH/node.skey
-chmod 444 $POOL_KEYS_PATH/node.counter
-
 
 # Determine the number of slots per KES period from the genesis file:
-slotsPerKESPeriod=$(cat $CNODE_HOME/files/shelley-genesis.json | jq -r '.slotsPerKESPeriod')
-echo slotsPerKESPeriod: ${slotsPerKESPeriod}
-
-
+# slotsPerKESPeriod=$(cat $CNODE_HOME/files/shelley-genesis.json | jq -r '.slotsPerKESPeriod')
+# echo slotsPerKESPeriod: ${slotsPerKESPeriod}
 # Find the kesPeriod by dividing the slot tip number by the slotsPerKESPeriod:
-slotNo=$(cardano-cli query tip $TESTNET_MAGIC $SOCKET_PATH | jq -r '.slot')
-echo slotNo: ${slotNo}
-kesPeriod=$((${slotNo} / ${slotsPerKESPeriod}))
-echo kesPeriod: ${kesPeriod}
-startKesPeriod=${kesPeriod}
-echo startKesPeriod: ${startKesPeriod}
+# slotNo=$(cardano-cli query tip $TESTNET_MAGIC $SOCKET_PATH | jq -r '.slot')
+# echo slotNo: ${slotNo}
+# kesPeriod=$((${slotNo} / ${slotsPerKESPeriod}))
+# echo kesPeriod: ${kesPeriod}
+# startKesPeriod=${kesPeriod}
+# echo startKesPeriod: ${startKesPeriod}
 
 
 # generate a operational certificate for your pool:
@@ -63,15 +54,10 @@ cardano-cli node issue-op-cert \
         --kes-period $startKesPeriod \
         --out-file $POOL_KEYS_PATH/node.cert
 
-chmod 444 $POOL_KEYS_PATH/node.cert
-
 # Make a VRF key pair:
 cardano-cli node key-gen-VRF \
         --verification-key-file $POOL_KEYS_PATH/vrf.vkey \
         --signing-key-file $POOL_KEYS_PATH/vrf.skey
-
-chmod 400 $POOL_KEYS_PATH/vrf.vkey
-chmod 400 $POOL_KEYS_PATH/vrf.skey
 
 mkdir -p $CNODE_HOME/priv/pool/$POOL_NAME
 
@@ -80,3 +66,13 @@ cp $POOL_KEYS_PATH/vrf.skey $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey
 cp $POOL_KEYS_PATH/node.cert $CNODE_HOME/priv/pool/$POOL_NAME/op.cert
 sudo chmod o-rwx $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey
 sudo chmod g-rwx $CNODE_HOME/priv/pool/$POOL_NAME/vrf.skey
+
+
+chmod 444 $POOL_KEYS_PATH/kes.vkey
+chmod 444 $POOL_KEYS_PATH/kes.skey
+chmod 400 $POOL_KEYS_PATH/vrf.vkey
+chmod 400 $POOL_KEYS_PATH/vrf.skey
+chmod 444 $POOL_KEYS_PATH/node.vkey
+chmod 444 $POOL_KEYS_PATH/node.skey
+chmod 444 $POOL_KEYS_PATH/node.counter
+chmod 444 $POOL_KEYS_PATH/node.cert
