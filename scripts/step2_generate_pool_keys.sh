@@ -35,15 +35,15 @@ cardano-cli node key-gen \
 
 
 # Determine the number of slots per KES period from the genesis file:
-# slotsPerKESPeriod=$(cat $CNODE_HOME/files/shelley-genesis.json | jq -r '.slotsPerKESPeriod')
-# echo slotsPerKESPeriod: ${slotsPerKESPeriod}
+slotsPerKESPeriod=$(cat $CNODE_HOME/files/shelley-genesis.json | jq -r '.slotsPerKESPeriod')
+echo slotsPerKESPeriod: ${slotsPerKESPeriod}
 # Find the kesPeriod by dividing the slot tip number by the slotsPerKESPeriod:
-# slotNo=$(cardano-cli query tip $TESTNET_MAGIC $SOCKET_PATH | jq -r '.slot')
-# echo slotNo: ${slotNo}
-# kesPeriod=$((${slotNo} / ${slotsPerKESPeriod}))
-# echo kesPeriod: ${kesPeriod}
-# startKesPeriod=${kesPeriod}
-# echo startKesPeriod: ${startKesPeriod}
+slotNo=$(cardano-cli query tip $TESTNET_MAGIC $SOCKET_PATH | jq -r '.slot')
+echo slotNo: ${slotNo}
+kesPeriod=$((${slotNo} / ${slotsPerKESPeriod}))
+echo kesPeriod: ${kesPeriod}
+startKesPeriod=${kesPeriod}
+echo startKesPeriod: ${startKesPeriod}
 
 
 # generate a operational certificate for your pool:

@@ -106,9 +106,5 @@
     }
   },
   "ExperimentalProtocolsEnabled": true,
-  "TestEnableDevelopmentNetworkProtocols": true,
-  "ByronGenesisHash": "66c31e9fda28dedd5047651af9d50f2b3b4037b13c785ebefb33422726d789f6",
-  "ShelleyGenesisHash": "55b6576b88e42a8685a8ee64744af009f765f862e47ee8a7cd563b05883f2b99",
-  "AlonzoGenesisHash": "dae8466b00fed7b662a036c66634b51355a1bdedfb7f7c712af58d909171e7b9",
-  "ConwayGenesisHash": "6f918a2b87228e40acc0d24889e0b74d7081f80003885c2257d7891189bfa919"
+  "TestEnableDevelopmentNetworkProtocols": true
 }
