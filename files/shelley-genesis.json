@@ -40,10 +40,10 @@
         "pools": {
             "8a219b698d3b6e034391ae84cee62f1d76b6fbc45ddfe4e31e0d4b60": {
                 "cost": 340000000,
-                "margin": 1.0,
+                "margin": 0.3,
                 "metadata": null,
                 "owners": [],
-                "pledge": 0,
+                "pledge": 1000000000,
                 "publicKey": "8a219b698d3b6e034391ae84cee62f1d76b6fbc45ddfe4e31e0d4b60",
                 "relays": [],
                 "rewardAccount": {
@@ -59,6 +59,6 @@
             "f0d61499f0f82264937e44605cba03bb59062fe8a2233b179c8f64d7": "8a219b698d3b6e034391ae84cee62f1d76b6fbc45ddfe4e31e0d4b60"
         }
     },
-    "systemStart": "2025-10-07T11:26:04Z",
+    "systemStart": "2025-10-08T22:29:33Z",
     "updateQuorum": 1
 }
