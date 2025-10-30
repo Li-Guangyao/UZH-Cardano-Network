@@ -13,8 +13,8 @@ TMP_PATH=~/tmp
 
 
 mkdir -p "$TMP_PATH"
-curl -sS -o "$TMP_PATH/guild-deploy.sh" https://raw.githubusercontent.com/cardano-community/guild-operators/master/scripts/cnode-helper-scripts/guild-deploy.sh
-# cp ~/UZH-Cardano-Network/guild-deploy.sh $TMP_PATH
+# curl -sS -o "$TMP_PATH/guild-deploy.sh" https://raw.githubusercontent.com/cardano-community/guild-operators/master/scripts/cnode-helper-scripts/guild-deploy.sh
+cp ~/UZH-Cardano-Network/guild-deploy.sh $TMP_PATH
 chmod 755 "$TMP_PATH/guild-deploy.sh"
 
 # Download the latest pre-built "binaries" available which will be stored in the ~/.local/bin directory:
@@ -56,6 +56,8 @@ fi
 rm "$CNODE_HOME/files"/*
 cp "$SCRIPT_DIR/../files"/* "$CNODE_HOME/files/"
 
+cp ~/UZH-Cardano-Network/env  $CNODE_HOME/scripts
+
 
 # Check if the cnode env file exists
 CNODE_ENV_FILE="$CNODE_HOME/scripts/env"
@@ -65,9 +67,9 @@ if [ ! -f "$CNODE_ENV_FILE" ]; then
 fi
 
 # Use awk to find and insert the line to the env file:
-PATTERN="POOL_NAME"
-NEW_LINE="POOL_NAME=\"pool2\""
-awk -v pattern="$PATTERN" -v newline="$NEW_LINE" '
-$0 ~ pattern && !modif { print $0; print newline; modif=1; next }
-{ print }
-' "$CNODE_ENV_FILE" > "${CNODE_ENV_FILE}.tmp" && mv "${CNODE_ENV_FILE}.tmp" "$CNODE_ENV_FILE"
+# PATTERN="POOL_NAME"
+# NEW_LINE="POOL_NAME=\"pool2\""
+# awk -v pattern="$PATTERN" -v newline="$NEW_LINE" '
+# $0 ~ pattern && !modif { print $0; print newline; modif=1; next }
+# { print }
+# ' "$CNODE_ENV_FILE" > "${CNODE_ENV_FILE}.tmp" && mv "${CNODE_ENV_FILE}.tmp" "$CNODE_ENV_FILE"
