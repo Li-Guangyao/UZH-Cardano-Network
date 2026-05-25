@@ -43,7 +43,7 @@ echo " pool-cost   = $POOL_COST"
 echo " pool-margin = $POOL_MARGIN"
 
 
-TESTNET_MAGIC="--testnet-magic 2025"
+TESTNET_MAGIC="--testnet-magic 42"
 SOCKET_PATH="--socket-path ${CNODE_HOME}/sockets/node.socket"
 
 UTXO_KEYS_PATH=~/keys/utxo-keys
@@ -58,12 +58,12 @@ echo minPoolCost: ${minPoolCost}
 
 
 # Generate the Pool Metadata hash:
-cardano-cli babbage stake-pool metadata-hash --pool-metadata-file ~/UZH-Cardano-Network/md.json 2>/dev/null  > ~/UZH-Cardano-Network/poolMetaDataHash.txt
+cardano-cli conway stake-pool metadata-hash --pool-metadata-file ~/UZH-Cardano-Network/md.json 2>/dev/null  > ~/UZH-Cardano-Network/poolMetaDataHash.txt
 
 
 # Create a "registration certificate" for the stake pool:
 #    --> Here we are pledging 1000000 ADA with a fixed pool cost of 345 ADA and a pool margin of 15%.
-cardano-cli babbage stake-pool registration-certificate \
+cardano-cli conway stake-pool registration-certificate \
     --cold-verification-key-file $POOL_KEYS_PATH/node.vkey \
     --vrf-verification-key-file $POOL_KEYS_PATH/vrf.vkey \
     --pool-pledge $POOL_PLEDGE \
@@ -74,7 +74,7 @@ cardano-cli babbage stake-pool registration-certificate \
     $TESTNET_MAGIC \
     --single-host-pool-relay 130.60.24.200 \
     --pool-relay-port 6000 \
-    --metadata-url ~/UZH-Cardano-Network/md.json \
+    --metadata-url http://130.60.24.200:81/files/af1c42cb87ac46c7b887e3_md.json \
     --metadata-hash $(cat ~/UZH-Cardano-Network/poolMetaDataHash.txt) \
     --out-file $POOL_KEYS_PATH/pool.cert \
     2>&1 | grep -v "WARNING:"
@@ -87,7 +87,7 @@ cardano-cli babbage stake-pool registration-certificate \
 #        --> You pledge funds are not moved anywhere. In this guide example, the pledge remains in the stake pool owner`s keys, specifically payment.addr
 #        --> Failing to fulfill pledge will result in missed block minting opportunities and your delegators would miss rewards.
 #        --> Your pledge is not locked up. You are free to transfer your funds.
-cardano-cli babbage stake-address stake-delegation-certificate \
+cardano-cli conway stake-address stake-delegation-certificate \
     --stake-verification-key-file $UTXO_KEYS_PATH/stake.vkey \
     --cold-verification-key-file $POOL_KEYS_PATH/node.vkey \
     --out-file $POOL_KEYS_PATH/delegation.cert \
@@ -105,53 +105,55 @@ currentSlot=$(cardano-cli query tip $TESTNET_MAGIC $SOCKET_PATH| jq -r '.slot')
 echo Current Slot: $currentSlot
 
 
-# Find your balance and UTXOs:
-cardano-cli query utxo --address $(cat $UTXO_KEYS_PATH/payment.addr) $TESTNET_MAGIC $SOCKET_PATH  > $TXS_PATH/fullUtxo2.out
-tail -n +3 $TXS_PATH/fullUtxo2.out | sort -k3 -nr > $TXS_PATH/balance2.out
+# # Find your balance and UTXOs:
+# cardano-cli query utxo --address $(cat $UTXO_KEYS_PATH/payment.addr) $TESTNET_MAGIC $SOCKET_PATH  > $TXS_PATH/fullUtxo2.out
+# tail -n +3 $TXS_PATH/fullUtxo2.out | sort -k3 -nr > $TXS_PATH/balance2.out
 
+# 直接生成 JSON 格式的 UTXO 快照
+cardano-cli query utxo \
+    --address $(cat $UTXO_KEYS_PATH/payment.addr) \
+    $TESTNET_MAGIC $SOCKET_PATH \
+    --out-file $TXS_PATH/utxo2.json
 
+# 解析
 tx_in=""
 total_balance=0
-while read -r utxo; do 
-    type=$(awk '{ print $6 }' <<< "${utxo}") 
-    if [[ ${type} == 'TxOutDatumNone' ]] 
-    then 
-        in_addr=$(awk '{ print $1 }' <<< "${utxo}") 
-        idx=$(awk '{ print $2 }' <<< "${utxo}") 
-        utxo_balance=$(awk '{ print $3 }' <<< "${utxo}") 
-        total_balance=$((${total_balance}+${utxo_balance})) 
-        echo TxHash: ${in_addr}#${idx} 
-        echo lovelace: ${utxo_balance} 
-        tx_in="${tx_in} --tx-in ${in_addr}#${idx}" 
-    fi 
-done < $TXS_PATH/balance2.out 
+while IFS= read -r line; do
+    utxo=$(echo "$line" | jq -r '.key')
+    amount=$(echo "$line" | jq -r '.value.value.lovelace')
+    has_datum=$(echo "$line" | jq -r '.value.datum // empty')
+    
+    if [[ -z "$has_datum" ]]; then
+        tx_in="${tx_in} --tx-in ${utxo}"
+        total_balance=$((total_balance + amount))
+    fi
+done < <(jq -c 'to_entries[]' $TXS_PATH/utxo2.json)
 
-
-txcnt=$(cat $TXS_PATH/balance2.out | wc -l)
-echo Total available lovelace balance: ${total_balance}
-echo Number of UTXOs: ${txcnt}
+txcnt=$(jq 'length' $TXS_PATH/utxo2.json)
+echo "Total available lovelace balance: ${total_balance}"
+echo "Number of UTXOs: ${txcnt}"
 
 
 # Find the deposit fee for a pool:
 stakePoolDeposit=$(cat $CNODE_HOME/files/params.json | jq -r '.stakePoolDeposit')
 echo stakePoolDeposit: $stakePoolDeposit
 
-cardano-cli babbage transaction build \
+cardano-cli conway transaction build \
     $TESTNET_MAGIC \
     $SOCKET_PATH \
     ${tx_in} \
-    --tx-out $(cat $UTXO_KEYS_PATH/payment.addr)+${stakePoolDeposit}  \
     --change-address $(cat $UTXO_KEYS_PATH/payment.addr) \
-    --invalid-hereafter $(( ${currentSlot} + 10000)) \
+    --invalid-hereafter $(( currentSlot + 10000 )) \
     --certificate-file $POOL_KEYS_PATH/pool.cert \
     --certificate-file $POOL_KEYS_PATH/delegation.cert \
+    --witness-override 3 \
     --out-file $TXS_PATH/tx2.raw \
     2>&1 | grep -v "WARNING:"
 
 
 
 # Sign the transaction:
-cardano-cli babbage transaction sign \
+cardano-cli conway transaction sign \
     --tx-body-file $TXS_PATH/tx2.raw \
     --signing-key-file $UTXO_KEYS_PATH/payment.skey \
     --signing-key-file $POOL_KEYS_PATH/node.skey \
@@ -163,7 +165,7 @@ cardano-cli babbage transaction sign \
 
 # Send the transaction:
 #    --> Output should be aas follows: "Transaction successfully submitted."
-cardano-cli babbage transaction submit \
+cardano-cli conway transaction submit \
     --tx-file $TXS_PATH/tx2.signed \
     $TESTNET_MAGIC \
     $SOCKET_PATH \

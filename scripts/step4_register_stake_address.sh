@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+# set -euo pipefail
 
-TESTNET_MAGIC="--testnet-magic 2025"
+TESTNET_MAGIC="--testnet-magic 42"
 SOCKET_PATH="--socket-path ${CNODE_HOME}/sockets/node.socket"
 
 UTXO_KEYS_PATH=~/keys/utxo-keys
@@ -16,38 +17,39 @@ cardano-cli query protocol-parameters \
     $TESTNET_MAGIC\
     --out-file $CNODE_HOME/files/params.json
 
+stakeAddressDeposit=$(jq -r '.stakeAddressDeposit' $CNODE_HOME/files/params.json)
 
 # Create a certificate, stake.cert, using the stake.vkey:
-cardano-cli babbage stake-address registration-certificate \
+cardano-cli conway stake-address registration-certificate \
     --stake-verification-key-file $UTXO_KEYS_PATH/stake.vkey \
+    --key-reg-deposit-amt $stakeAddressDeposit \
     --out-file $UTXO_KEYS_PATH/stake.cert \
     2>&1 | grep -v "WARNING:"
 
-# Find your balance and UTXOs.
-#cd $TXS_PATH
-cardano-cli query utxo --address $(cat $UTXO_KEYS_PATH/payment.addr) $TESTNET_MAGIC $SOCKET_PATH > $TXS_PATH/fullUtxo1.out
-tail -n +3 $TXS_PATH/fullUtxo1.out | sort -k3 -nr > $TXS_PATH/balance1.out
-#cat $TXS_PATH/balance1.out
+# Find your balance and UTXOs (JSON 格式)
+cardano-cli query utxo \
+    --address $(cat $UTXO_KEYS_PATH/payment.addr) \
+    $TESTNET_MAGIC $SOCKET_PATH \
+    --out-file $TXS_PATH/utxo.json
 
+
+# 用 jq 提取所有无 datum 的 UTXO
 tx_in=""
 total_balance=0
-while read -r utxo; do 
-    type=$(awk '{ print $6 }' <<< "${utxo}") 
-    if [[ ${type} == 'TxOutDatumNone' ]] 
-    then 
-        in_addr=$(awk '{ print $1 }' <<< "${utxo}") 
-        idx=$(awk '{ print $2 }' <<< "${utxo}") 
-        utxo_balance=$(awk '{ print $3 }' <<< "${utxo}") 
-        total_balance=$((${total_balance}+${utxo_balance})) 
-        echo TxHash: ${in_addr}#${idx} 
-        echo lovelace: ${utxo_balance} 
-        tx_in="${tx_in} --tx-in ${in_addr}#${idx}" 
-    fi 
-done < $TXS_PATH/balance1.out 
+while IFS= read -r line; do
+    utxo=$(echo "$line" | jq -r '.key')
+    amount=$(echo "$line" | jq -r '.value.value.lovelace')
+    has_datum=$(echo "$line" | jq -r '.value.datum // .value.inlineDatum // .value.datumhash // empty')
 
-txcnt=$(cat $TXS_PATH/balance1.out | wc -l)
-echo Total available lovelace balance: ${total_balance}
-echo Number of UTXOs: ${txcnt}
+    if [[ -z "$has_datum" && "$amount" =~ ^[0-9]+$ ]]; then
+        tx_in="${tx_in} --tx-in ${utxo}"
+        total_balance=$((total_balance + amount))
+    fi
+done < <(jq -c 'to_entries[]' $TXS_PATH/utxo.json)
+
+txcnt=$(jq 'length' $TXS_PATH/utxo.json)
+echo "Total available lovelace balance: ${total_balance}"
+echo "Number of UTXOs: ${txcnt}"
 
 
 # Find the amount of the deposit required to register a stake address:
@@ -61,7 +63,7 @@ currentSlot=$(cardano-cli query tip  $TESTNET_MAGIC $SOCKET_PATH | jq -r '.slot'
 echo Current Slot: $currentSlot
 
 
-cardano-cli babbage transaction build \
+cardano-cli conway transaction build \
   ${tx_in} \
   --change-address $(cat $UTXO_KEYS_PATH/payment.addr) \
   --certificate-file $UTXO_KEYS_PATH/stake.cert \
@@ -70,7 +72,7 @@ cardano-cli babbage transaction build \
   2>&1 | grep -v "WARNING:"
 
 # Sign the transaction with both the payment and stake secret keys:
-cardano-cli babbage transaction sign \
+cardano-cli conway transaction sign \
     --tx-body-file $TXS_PATH/tx1.raw \
     --signing-key-file $UTXO_KEYS_PATH/payment.skey \
     --signing-key-file $UTXO_KEYS_PATH/stake.skey \
@@ -80,7 +82,7 @@ cardano-cli babbage transaction sign \
 
 # Send the signed transaction:
 #    --> Output should be aas follows: "Transaction successfully submitted."
-cardano-cli babbage transaction submit \
+cardano-cli conway transaction submit \
     --tx-file $TXS_PATH/tx1.signed \
      $TESTNET_MAGIC $SOCKET_PATH \
      2>&1 | grep -v "WARNING:"

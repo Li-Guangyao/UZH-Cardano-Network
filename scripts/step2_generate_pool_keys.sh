@@ -6,7 +6,7 @@
 #     return 1
 # fi
 
-TESTNET_MAGIC="--testnet-magic 2025"
+TESTNET_MAGIC="--testnet-magic 42"
 SOCKET_PATH="--socket-path ${CNODE_HOME}/sockets/node.socket"
 
 # POOL_NAME=$1

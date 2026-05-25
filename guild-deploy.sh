@@ -61,7 +61,7 @@ versionCheck() { printf '%s\n%s' "${1//v/}" "${2//v/}" | sort -C -V; } #$1=avail
 usage() {
   cat <<-EOF >&2
 
-		Usage: $(basename "$0") [-n <mainnet|guild|preprod|preview|sanchonet>] [-p path] [-t <name>] [-b <branch>] [-u] [-s [p][b][l][m][d][c][o][w][x][f][s]]
+		Usage: $(basename "$0") [-n <mainnet|guild|preprod|preview>] [-p path] [-t <name>] [-b <branch>] [-u] [-s [p][b][l][m][d][c][o][w][x][f][s]]
 		Set up dependencies for building/using common tools across cardano ecosystem.
 		The script will always update dynamic content from existing scripts retaining existing user variables
 
@@ -109,8 +109,8 @@ set_defaults() {
   [[ -z "${BRANCH}" ]] && BRANCH="master"
   [[ "${SUDO}" = 'Y' ]] && sudo="sudo" || sudo=""
   [[ "${SUDO}" = 'Y' && $(id -u) -eq 0 ]] && err_exit "Please run as non-root user."
-  [[ -z "${CARDANO_NODE_VERSION}" ]] && CARDANO_NODE_VERSION="10.1.4"
-  [[ -z "${CARDANO_CLI_VERSION}" ]] && CARDANO_CLI_VERSION="10.1.1.0"
+  [[ -z "${CARDANO_NODE_VERSION}" ]] && CARDANO_NODE_VERSION="10.5.0"
+  [[ -z "${CARDANO_CLI_VERSION}" ]] && CARDANO_CLI_VERSION="10.11.1.0"
   CNODE_HOME="${CNODE_PATH}/${CNODE_NAME}"
   CNODE_VNAME=$(echo "$CNODE_NAME" | awk '{print toupper($0)}')
   [[ -z ${MITHRIL_HOME} ]] && MITHRIL_HOME="${CNODE_HOME}/mithril"
@@ -179,9 +179,8 @@ updateWithCustomConfig() {
       STATIC_CMD=$(awk '/#!/{x=1}/^# Do NOT modify/{exit} x' ${file})
       printf '%s\n%s\n' "${STATIC_CMD}" "${TEMPL_CMD}" > ${file}.tmp
     else
-      err_exit "Problems encountered while fetching \"${file}\" from Github, could be an issue with connectivity or Github site!"
       rm -f ${file}.tmp
-      return
+      err_exit "Problems encountered while fetching \"${file}\" from Github, could be an issue with connectivity or Github site!"
     fi
   fi
   [[ ! -d ./archive ]] && mkdir archive
@@ -214,8 +213,8 @@ os_dependencies() {
     fi
     if [[ "${WANT_BUILD_DEPS}" == "Y" ]]; then
       libncurses_pkg="libncursesw5"
-      [[ -f /etc/debian_version ]] && grep -q trixie /etc/debian_version && libncurses_pkg="libncursesw6"
-      pkg_list="${pkg_list} ${libncurses_pkg} libtinfo-dev libnuma-dev libpq-dev liblmdb-dev libffi-dev libgmp-dev libssl-dev libsystemd-dev libsodium-dev zlib1g-dev llvm clang"
+      [[ -f /etc/debian_version ]] && grep -qE '(trixie|13)' /etc/debian_version && libncurses_pkg="libncursesw6"
+      pkg_list="${pkg_list} ${libncurses_pkg} libtinfo-dev libnuma-dev libpq-dev liblmdb-dev libffi-dev libgmp-dev libssl-dev libsystemd-dev zlib1g-dev llvm clang"
     fi
     if [[ "${INSTALL_CWHCLI}" == "Y" ]]; then
       pkg_list="${pkg_list} libusb-1.0-0-dev libudev-dev"
@@ -245,7 +244,7 @@ os_dependencies() {
       pkg_list="${pkg_list} make gcc-c++ autoconf automake"
     fi
     if [[ "${WANT_BUILD_DEPS}" == "Y" ]]; then
-      pkg_list="${pkg_list} ncurses-libs ncurses-devel openssl-devel systemd-devel libsodium-devel llvm clang numactl-devel libffi-devel gmp-devel zlib-devel lmdb-devel"
+      pkg_list="${pkg_list} ncurses-libs ncurses-devel openssl-devel systemd-devel llvm clang numactl-devel libffi-devel gmp-devel zlib-devel lmdb-devel lmdb"
     fi
     add_epel_repository "${DISTRO}" "${VERSION_ID}" "${pkg_opts}"
   else
@@ -280,8 +279,8 @@ os_dependencies() {
 build_dependencies() {
   echo -e "\nInstalling Haskell build/compiler dependencies (if missing)..."
   export BOOTSTRAP_HASKELL_NO_UPGRADE=1
-  export BOOTSTRAP_HASKELL_GHC_VERSION=8.10.7
-  export BOOTSTRAP_HASKELL_CABAL_VERSION=3.10.2.0
+  export BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7
+  export BOOTSTRAP_HASKELL_CABAL_VERSION=3.12.1.0
   if ! command -v ghcup &>/dev/null; then
     echo -e "\nInstalling ghcup (The Haskell Toolchain installer) .."
     BOOTSTRAP_HASKELL_NONINTERACTIVE=1
@@ -326,9 +325,9 @@ build_libsodium() {
   git fetch >/dev/null 2>&1
   [[ -z "${SODIUM_REF}" ]] && SODIUM_REF="dbb48cc"
   git checkout "${SODIUM_REF}" &>/dev/null
-  ./autogen.sh > autogen.log > /tmp/libsodium.log 2>&1
-  ./configure > configure.log >> /tmp/libsodium.log 2>&1
-  make > make.log 2>&1 || err_exit  " Could not complete \"make\" for libsodium package, please try to run it manually to diagnose!"
+  ./autogen.sh > autogen.log > /tmp/libsodium.log 2>&1 || cat /tmp/libsodium.log
+  ./configure > configure.log >> /tmp/libsodium.log 2>&1 || cat /tmp/libsodium.log
+  make > make.log 2>&1 || ( cat make.log && err_exit  " Could not complete \"make\" for libsodium package, please try to run it manually to diagnose!" )
   $sudo make install > install.log 2>&1
   echo -e "\nIOG fork of libsodium installed to /usr/local/lib/"
 }
@@ -365,7 +364,7 @@ build_libblst() {
   [[ ! -d "./blst" ]] && git clone https://github.com/supranational/blst &>/dev/null
   pushd blst >/dev/null || err_exit
   git fetch >/dev/null 2>&1
-  [[ -z "${BLST_REF}" ]] && BLST_REF="v0.3.11"
+  [[ -z "${BLST_REF}" ]] && BLST_REF="v0.3.14"
   git checkout ${BLST_REF} &>/dev/null
   ./build.sh >/dev/null 2>&1
   cat <<-EOF >libblst.pc
@@ -377,7 +376,7 @@ build_libblst() {
 		Name: libblst
 		Description: Multilingual BLS12-381 signature library
 		URL: https://github.com/supranational/blst
-		Version: 0.3.10
+		Version: 0.3.14
 		Cflags: -I\${includedir}
 		Libs: -L\${libdir} -lblst
 		EOF
@@ -397,7 +396,7 @@ download_cnodebins() {
   echo -e "\n  Downloading Cardano Node ${CARDANO_NODE_VERSION} archive from GitHub.."
   rm -f cardano-node cardano-address
   curl -m 200 -sfL https://github.com/intersectmbo/cardano-node/releases/download/${CARDANO_NODE_VERSION}/cardano-node-${CARDANO_NODE_VERSION}-linux.tar.gz -o cnode.tar.gz || err_exit " Could not download cardano-node release ${CARDANO_NODE_VERSION} from GitHub!"
-  tar zxf cnode.tar.gz --strip-components 2 ./bin/cardano-node ./bin/cardano-submit-api ./bin/bech32 &>/dev/null
+  tar zxf cnode.tar.gz --strip-components 2 ./bin/cardano-node ./bin/cardano-submit-api ./bin/bech32 ./bin/snapshot-converter &>/dev/null
   rm -f cnode.tar.gz
   echo -e "\n  Downloading Cardano CLI ${CARDANO_CLI_VERSION} archive from GitHub.."
   curl -m 200 -sfL https://github.com/IntersectMBO/cardano-cli/releases/download/cardano-cli-${CARDANO_CLI_VERSION}/cardano-cli-${CARDANO_CLI_VERSION}-x86_64-linux.tar.gz -o ccli.tar.gz || err_exit " Could not download cardano-cli release ${CARDANO_CLI_VERSION} from GitHub!"
@@ -607,7 +606,7 @@ populate_cnode() {
   # Download node config, genesis and topology from template
   #NWCONFURL="https://raw.githubusercontent.com/input-output-hk/cardano-playground/main/static/book.play.dev.cardano.org/environments"
   NWCONFURL="${URL_RAW}/files/configs/${NETWORK}/"
-  if [[ ${NETWORK} =~ ^(mainnet|preprod|preview|guild|sanchonet)$ ]]; then
+  if [[ ${NETWORK} =~ ^(mainnet|preprod|preview|guild)$ ]]; then
     curl -sL -f -m ${CURL_TIMEOUT} -o alonzo-genesis.json.tmp "${NWCONFURL}/alonzo-genesis.json" || err_exit "${err_msg} alonzo-genesis.json"
     curl -sL -f -m ${CURL_TIMEOUT} -o byron-genesis.json.tmp "${NWCONFURL}/byron-genesis.json" || err_exit "${err_msg} byron-genesis.json"
     curl -sL -f -m ${CURL_TIMEOUT} -o conway-genesis.json.tmp "${NWCONFURL}/conway-genesis.json" || err_exit "${err_msg} conway-genesis.json"
@@ -615,10 +614,12 @@ populate_cnode() {
     curl -sL -f -m ${CURL_TIMEOUT} -o topology.json.tmp "${NWCONFURL}/topology.json" || err_exit "${err_msg} topology.json"
     curl -sL -f -m ${CURL_TIMEOUT} -o config.json.tmp "${NWCONFURL}/config.json" || err_exit "${err_msg} config.json"
     curl -sL -f -m ${CURL_TIMEOUT} -o dbsync.json.tmp "${NWCONFURL}/db-sync-config.json" || err_exit "${err_msg} dbsync-sync-config.json"
+    curl -sL -f -m ${CURL_TIMEOUT} -o submitapi.json "${NWCONFURL}/submitapi.json" || err_exit "${err_msg} submitapi.json"
   else
-    err_exit "Unknown network specified! Kindly re-check the network name, valid options are: mainnet, guild, preprod, preview or sanchonet."
+    err_exit "Unknown network specified! Kindly re-check the network name, valid options are: mainnet, guild, preprod, or preview."
   fi
   sed -e "s@/opt/cardano/cnode@${CNODE_HOME}@g" -i ./*.json.tmp
+  sed -e "s@\"TraceOptionNodeName\": \"cnode\"@\"TraceOptionNodeName\": \"${CNODE_NAME}\"@" -i ./config.json.tmp
   if [[ ${FORCE_OVERWRITE} = 'Y' ]]; then
     [[ -f topology.json ]] && cp -f topology.json "topology.json_bkp$(date +%s)"
     [[ -f config.json ]] && cp -f config.json "config.json_bkp$(date +%s)"
@@ -646,7 +647,7 @@ populate_cnode() {
 
   [[ ${SCRIPTS_FORCE_OVERWRITE} = 'Y' ]] && echo -e "\nForced full upgrade! Please edit scripts/env, scripts/cnode.sh, scripts/dbsync.sh, scripts/submitapi.sh, scripts/ogmios.sh, scripts/gLiveView.sh and scripts/topologyUpdater.sh scripts/mithril-client.sh scripts/mithril-relay.sh scripts/mithril-signer.sh (alongwith files/topology.json, files/config.json, files/dbsync.json) as required!"
 
-  updateWithCustomConfig "blockPerf.sh"
+  #updateWithCustomConfig "blockPerf.sh"
   updateWithCustomConfig "cabal-build-all.sh"
   updateWithCustomConfig "cncli.sh"
   updateWithCustomConfig "cnode.sh"
@@ -656,7 +657,7 @@ populate_cnode() {
   updateWithCustomConfig "deploy-as-systemd.sh"
   updateWithCustomConfig "env"
   updateWithCustomConfig "gLiveView.sh"
-  updateWithCustomConfig "logMonitor.sh"
+  #updateWithCustomConfig "logMonitor.sh"
   updateWithCustomConfig "ogmios.sh"
   updateWithCustomConfig "submitapi.sh"
   updateWithCustomConfig "setup_mon.sh"

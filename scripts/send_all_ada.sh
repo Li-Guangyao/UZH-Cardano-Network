@@ -1,71 +1,101 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-# Check the number of input arguments
+# 用法：./send_all_ada.sh <RECEIVER_ADDRESS>
 if [ "$#" -ne 1 ]; then
-    echo "You must provide exactly 1 arguments: ./send_all_ada.sh <ADDRESS>"
+    echo "Usage: ./send_all_ada.sh <RECEIVER_ADDRESS>"
     exit 1
 fi
 
-TESTNET_MAGIC="--testnet-magic 2025"
+RECEIVER_ADDR=$1
+
+# 基本地址格式校验
+if ! [[ "$RECEIVER_ADDR" =~ ^addr(_test)?[0-9a-z]+$ ]]; then
+    echo "Error: invalid Cardano address: $RECEIVER_ADDR"
+    exit 1
+fi
+
+# 环境检查
+if [[ -z "${CNODE_HOME:-}" ]]; then
+    echo "Error: \$CNODE_HOME is not set"
+    exit 1
+fi
+
+TESTNET_MAGIC="--testnet-magic 42"
 SOCKET_PATH="--socket-path ${CNODE_HOME}/sockets/node.socket"
 
 UTXO_KEYS_PATH=~/keys/utxo-keys
-POOL_KEYS_PATH=~/keys/pool-keys
 TXS_PATH=~/txs
+mkdir -p "$TXS_PATH"
 
-set -euo pipefail
+FROM_ADDR=$(cat "$UTXO_KEYS_PATH/payment.addr")
+echo "From:   $FROM_ADDR"
+echo "To:     $RECEIVER_ADDR (all funds)"
 
-
-RECEIVER_ADDR=$1
-
-# Find your balance and UTXOs:
-cardano-cli query utxo --address $(cat $UTXO_KEYS_PATH/payment.addr) $TESTNET_MAGIC $SOCKET_PATH > $TXS_PATH/fullUtxo_faucet.out
-tail -n +3 $TXS_PATH/fullUtxo_faucet.out | sort -k3 -nr > $TXS_PATH/balance_faucet.out
-cat $TXS_PATH/balance_faucet.out
+# ---------- 查询 UTXO（JSON 格式） ----------
+cardano-cli query utxo \
+    --address "$FROM_ADDR" \
+    $TESTNET_MAGIC $SOCKET_PATH \
+    --out-file "$TXS_PATH/utxo_back.json"
 
 tx_in=""
 total_balance=0
-while read -r utxo; do 
-    #type=$(awk '{ print $6 }' <<< "${utxo}") 
-    #if [[ ${type} == 'TxOutDatumNone' ]] 
-    #then 
-        in_addr=$(awk '{ print $1 }' <<< "${utxo}") 
-        idx=$(awk '{ print $2 }' <<< "${utxo}") 
-        utxo_balance=$(awk '{ print $3 }' <<< "${utxo}") 
-        total_balance=$((${total_balance}+${utxo_balance})) 
-        echo TxHash: ${in_addr}#${idx} 
-        echo lovelace: ${utxo_balance} 
-        tx_in="${tx_in} --tx-in ${in_addr}#${idx}" 
-    #fi 
-done < $TXS_PATH/balance_faucet.out 
+while IFS= read -r line; do
+    utxo=$(echo "$line" | jq -r '.key')
+    amount=$(echo "$line" | jq -r '.value.value.lovelace')
+    has_datum=$(echo "$line" | jq -r '.value.datum // .value.inlineDatum // .value.datumhash // empty')
 
-txcnt=$(cat $TXS_PATH/balance_faucet.out | wc -l)
-echo Total available lovelace balance: ${total_balance}
-echo Number of UTXOs: ${txcnt}
+    if [[ -z "$has_datum" && "$amount" =~ ^[0-9]+$ ]]; then
+        tx_in="${tx_in} --tx-in ${utxo}"
+        total_balance=$((total_balance + amount))
+    fi
+done < <(jq -c 'to_entries[]' "$TXS_PATH/utxo_back.json")
 
+txcnt=$(jq 'length' "$TXS_PATH/utxo_back.json")
+echo "Total available lovelace balance: $total_balance"
+echo "Number of UTXOs: $txcnt"
 
-cardano-cli babbage transaction build \
-    ${tx_in} \
-    --change-address $RECEIVER_ADDR \
+if [[ -z "$tx_in" ]]; then
+    echo "Error: no spendable UTXO at $FROM_ADDR"
+    exit 1
+fi
+
+# ---------- Build ----------
+# 不指定 --tx-out，把所有 change 给 RECEIVER，等于"扣掉 fee 后全转给对方"
+cardano-cli conway transaction build \
+    $tx_in \
+    --change-address "$RECEIVER_ADDR" \
+    $TESTNET_MAGIC $SOCKET_PATH \
+    --out-file "$TXS_PATH/tx_back.raw" \
+    2> >(grep -v "WARNING:" >&2)
+
+[[ -s "$TXS_PATH/tx_back.raw" ]] || { echo "build failed"; exit 1; }
+
+# ---------- Sign ----------
+cardano-cli conway transaction sign \
+    --tx-body-file "$TXS_PATH/tx_back.raw" \
+    --signing-key-file "$UTXO_KEYS_PATH/payment.skey" \
     $TESTNET_MAGIC \
-    $SOCKET_PATH \
-    --out-file $TXS_PATH/tx_back.raw \
-    2>&1 | grep -v "WARNING:"
+    --out-file "$TXS_PATH/tx_back.signed" \
+    2> >(grep -v "WARNING:" >&2)
 
+[[ -s "$TXS_PATH/tx_back.signed" ]] || { echo "sign failed"; exit 1; }
 
-cardano-cli babbage transaction sign \
-    --tx-body-file $TXS_PATH/tx_back.raw \
-    --out-file $TXS_PATH/tx_back.signed \
-    --signing-key-file $UTXO_KEYS_PATH/payment.skey \
-    $TESTNET_MAGIC \
-    2>&1 | grep -v "WARNING:"
-
-
+# ---------- TxID ----------
+TXID=$(cardano-cli conway transaction txid \
+    --tx-file "$TXS_PATH/tx_back.signed" \
+    | jq -r '.txhash // .')
 echo "----------transaction id----------"
-cardano-cli babbage transaction txid --tx-file $TXS_PATH/tx_back.signed 2>&1 | grep -v "WARNING:"
-echo "-----------------------------------"
+echo "$TXID"
+echo "----------------------------------"
 
-cardano-cli babbage transaction submit --tx-file $TXS_PATH/tx_back.signed $TESTNET_MAGIC $SOCKET_PATH 2>&1 | grep -v "WARNING:"
+# ---------- Submit ----------
+cardano-cli conway transaction submit \
+    --tx-file "$TXS_PATH/tx_back.signed" \
+    $TESTNET_MAGIC $SOCKET_PATH \
+    2> >(grep -v "WARNING:" >&2)
 
-rm $TXS_PATH/tx_back.raw
-mv $TXS_PATH/tx_back.signed $TXS_PATH/tx_back.sent
+# ---------- 归档 ----------
+rm -f "$TXS_PATH/tx_back.raw"
+mv "$TXS_PATH/tx_back.signed" "$TXS_PATH/tx_back.${TXID}.sent"
+echo "Done. Signed tx archived as tx_back.${TXID}.sent"

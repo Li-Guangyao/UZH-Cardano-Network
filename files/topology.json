@@ -1,42 +1,25 @@
 {
-    "localRoots": [
+  "localRoots": [
+    {
+      "accessPoints": [
         {
-            "accessPoints": [
-                {
-                    "address": "172.23.79.155",
-                    "port": 6000
-                },
-                {
-                    "address": "172.23.78.59",
-                    "port": 6000
-                },
-                {
-                    "address": "130.60.24.200",
-                    "port": 6000
-                }
-            ],
-            "advertise": true,
-            "valency": 1
+          "address": "130.60.24.200",
+          "port": 6000
         }
-    ],
-    "useLedgerAfterSlot": 0,
-    "publicRoots": [
+      ],
+      "valency": 1
+    }
+  ],
+  "publicRoots": [
+    {
+      "accessPoints": [
         {
-            "accessPoints": [
-                {
-                    "address": "172.23.79.155",
-                    "port": 6000
-                },
-                {
-                    "address": "172.23.78.59",
-                    "port": 6000
-                },
-                {
-                    "address": "130.60.24.200",
-                    "port": 6000
-                }
-            ],
-            "advertise": true
+          "address": "130.60.24.200",
+          "port": 6000
         }
-    ]
+      ],
+      "advertise": true
+    }
+  ],
+  "useLedgerAfterSlot": 5
 }

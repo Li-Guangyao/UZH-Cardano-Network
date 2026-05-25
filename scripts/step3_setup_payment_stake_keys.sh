@@ -2,7 +2,7 @@
 
 # Payment keys are used to send and receive payments and stake keys are used to manage stake delegations.
 
-TESTNET_MAGIC="--testnet-magic 2025"
+TESTNET_MAGIC="--testnet-magic 42"
 
 UTXO_KEYS_PATH=~/keys/utxo-keys
 POOL_KEYS_PATH=~/keys/pool-keys

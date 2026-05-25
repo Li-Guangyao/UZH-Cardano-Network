@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 
-TESTNET_MAGIC="--testnet-magic 2025"
+TESTNET_MAGIC="--testnet-magic 42"
 SOCKET_PATH="--socket-path ${CNODE_HOME}/sockets/node.socket"
 
 UTXO_KEYS_PATH=~/keys/utxo-keys
