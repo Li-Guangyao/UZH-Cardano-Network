@@ -74,7 +74,7 @@ cardano-cli conway stake-pool registration-certificate \
     $TESTNET_MAGIC \
     --single-host-pool-relay 130.60.24.200 \
     --pool-relay-port 6000 \
-    --metadata-url http://130.60.24.200:81/files/af1c42cb87ac46c7b887e3_md.json \
+    --metadata-url http://130.60.24.200:81/files/0fd38170574b4cbe82e7e9_md.json \
     --metadata-hash $(cat ~/UZH-Cardano-Network/poolMetaDataHash.txt) \
     --out-file $POOL_KEYS_PATH/pool.cert \
     2>&1 | grep -v "WARNING:"

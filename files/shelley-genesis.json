@@ -1,5 +1,5 @@
 {
-  "activeSlotsCoeff" : 1.0,
+  "activeSlotsCoeff" : 0.1,
   "epochLength" : 1000,
   "genDelegs" : {
     "337bc5ef0f1abf205624555c13a37258c42b46b1259a6b1a6d82574e" : {
@@ -61,7 +61,7 @@
     "rho" : 0.003,
     "tau" : 0.2
   },
-  "securityParam" : 167,
+  "securityParam" : 10,
   "slotLength" : 1,
   "slotsPerKESPeriod" : 129600,
   "staking" : {
@@ -87,6 +87,6 @@
       "295b987135610616f3c74e11c94d77b6ced5ccc93a7d719cfb135062" : "7301761068762f5900bde9eb7c1c15b09840285130f5b0f53606cc57"
     }
   },
-  "systemStart" : "2026-05-21T17:00:46Z",
+  "systemStart" : "2026-06-05T10:54:49Z",
   "updateQuorum" : 1
 }
