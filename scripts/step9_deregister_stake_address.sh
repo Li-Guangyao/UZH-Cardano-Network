@@ -15,8 +15,8 @@ STAKE_ADDR=$(cat "$UTXO_KEYS_PATH/stake.addr")
 # ---------- sync check ----------
 SYNC=$(cardano-cli query tip $TESTNET_MAGIC $SOCKET_PATH | jq -r '.syncProgress')
 if [[ "$SYNC" != "100.00" ]]; then
-    echo "syncProgress: $SYNC ... please wait for sync."
-    exit 1
+    echo "syncProgress: $SYNC ... please wait for the node to sync and then try again."
+    return 1 2>/dev/null || exit 1
 fi
 
 # ---------- query stake address status：registered？rewards？how much deposit？ ----------

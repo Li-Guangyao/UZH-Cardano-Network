@@ -13,9 +13,8 @@ SYNC=$(cardano-cli query tip $TESTNET_MAGIC $SOCKET_PATH | jq -r '.syncProgress'
 
 if [[ "$SYNC" != "100.00" ]]; then
     echo "syncProgress: $SYNC ... please wait for the node to sync and then try again."
-    exit 1
+    return 1 2>/dev/null || exit 1
 fi
-
 
 CURRENT_EPOCH=$(cardano-cli query tip $TESTNET_MAGIC $SOCKET_PATH | jq '.epoch')
 echo current epoch: ${CURRENT_EPOCH}
