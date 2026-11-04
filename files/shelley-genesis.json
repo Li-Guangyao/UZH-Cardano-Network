@@ -50,7 +50,7 @@
     "maxTxSize" : 16384,
     "minFeeA" : 44,
     "minFeeB" : 155381,
-    "minPoolCost" : 170000000,
+    "minPoolCost" : 50000000,
     "minUTxOValue" : 1000000,
     "nOpt" : 100,
     "poolDeposit" : 500000000,
@@ -58,12 +58,12 @@
       "major" : 10,
       "minor" : 2
     },
-    "rho" : 0.003,
-    "tau" : 0.2
+    "rho" : 6.0E-6,
+    "tau" : 0.0
   },
   "securityParam" : 10,
   "slotLength" : 1,
-  "slotsPerKESPeriod" : 129600,
+  "slotsPerKESPeriod" : 12960000,
   "staking" : {
     "pools" : {
       "7301761068762f5900bde9eb7c1c15b09840285130f5b0f53606cc57" : {
@@ -87,6 +87,6 @@
       "295b987135610616f3c74e11c94d77b6ced5ccc93a7d719cfb135062" : "7301761068762f5900bde9eb7c1c15b09840285130f5b0f53606cc57"
     }
   },
-  "systemStart" : "2026-06-05T10:54:49Z",
+  "systemStart" : "2026-10-26T22:06:28Z",
   "updateQuorum" : 1
 }
