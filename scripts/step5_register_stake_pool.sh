@@ -16,8 +16,8 @@ done
 
 # Get pool-cost
 while true; do
-    read -p "Please input pool cost (The unit is lovelace. The number must be an integer >= 340,000,000), e.g., 345000000: " POOL_COST
-    if [[ "$POOL_COST" =~ ^[0-9]+$ ]] && [ "$POOL_COST" -ge 340000000 ]; then
+    read -p "Please input pool cost (The unit is lovelace. The number must be an integer >= 50,000,000), e.g., 50000000: " POOL_COST
+    if [[ "$POOL_COST" =~ ^[0-9]+$ ]] && [ "$POOL_COST" -ge 50000000 ]; then
         break
     else
         echo "Invalid input: pool cost must be an integer greater than or equal to 340,000,000, please re-enter."
@@ -74,7 +74,7 @@ cardano-cli conway stake-pool registration-certificate \
     $TESTNET_MAGIC \
     --single-host-pool-relay 130.60.24.200 \
     --pool-relay-port 6000 \
-    --metadata-url http://130.60.24.200:81/files/08bb1cb5cb3a439cb2082f_md.json \
+    --metadata-url http://130.60.24.200:81/files/0e775df687a84c71a834dd_md.json \
     --metadata-hash $(cat ~/UZH-Cardano-Network/poolMetaDataHash.txt) \
     --out-file $POOL_KEYS_PATH/pool.cert \
     2>&1 | grep -v "WARNING:"
